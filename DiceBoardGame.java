@@ -1,60 +1,56 @@
-import java.util.*;
+import java.util.Random;
+import java.util.Scanner;
 
-class DiceBoardGame {
+public class DiceBoardGame {
+    private static int targetScore;
+    private static int[] scores;
+    private static boolean[] completedPlayers;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Random random = new Random();
 
         System.out.print("Enter the number of players: ");
         int numPlayers = scanner.nextInt();
 
         System.out.print("Enter the target score: ");
-        int targetScore = scanner.nextInt();
+        targetScore = scanner.nextInt();
 
-        int[] scores = new int[numPlayers];
-        boolean[] completed = new boolean[numPlayers];
+        scores = new int[numPlayers];
+        completedPlayers = new boolean[numPlayers];
 
-        playGame(0, numPlayers, scores, completed, targetScore, random, scanner);
-
-        System.out.println("Game Over!");
+        playGame();
         scanner.close();
+        System.out.println(" Game Over! ");
     }
 
-    public static void playGame(int currentPlayer, int numPlayers, int[] scores, boolean[] completed,
-                                int targetScore, Random random, Scanner scanner) {
-        if (checkAllCompleted(completed)) {
-            return;
-        }
+    public static void playGame() {
+        Random random = new Random();
+        int currentPlayer = 0;
 
-        if (completed[currentPlayer]) {
-            playGame((currentPlayer + 1) % numPlayers, numPlayers, scores, completed, targetScore, random, scanner);
-            return;
-        }
+        while (true) {
+            int roll = random.nextInt(6) + 1; // Simulate dice roll
+            scores[currentPlayer] += roll;
+            System.out.println("Player " + (currentPlayer + 1) + " rolled a " + roll + ". Score: " + scores[currentPlayer]);
 
-        System.out.print("Player " + (currentPlayer + 1) + " - Press Enter to roll the dice: ");
-        scanner.nextLine();
-
-        int diceValue = random.nextInt(6) + 1;
-        scores[currentPlayer] += diceValue;
-
-        System.out.println("Player " + (currentPlayer + 1) + " rolled a " + diceValue);
-        System.out.println("Current Score: " + scores[currentPlayer]);
-
-        if (scores[currentPlayer] >= targetScore) {
-            System.out.println("Player " + (currentPlayer + 1) + " has won!");
-            completed[currentPlayer] = true;
-        }
-
-        System.out.println();
-
-        playGame((currentPlayer + 1) % numPlayers, numPlayers, scores, completed, targetScore, random, scanner);
-    }
-
-    public static boolean checkAllCompleted(boolean[] completed) {
-        for (boolean isCompleted : completed) {
-            if (!isCompleted) {
-                return false;
+            if (scores[currentPlayer] >= targetScore) {
+                System.out.println("Player " + (currentPlayer + 1) + " wins!");
+                break;
             }
+
+            currentPlayer = (currentPlayer + 1) % scores.length;
+
+            if (isGameComplete()) {
+                System.out.println("All players have completed their turns. No winner.");
+                break;
+            }
+        }
+    }
+
+    public static boolean isGameComplete() {
+        for (int i = 0; i < scores.length; i++) {
+            if (!completedPlayers[i] && scores[i] < targetScore)
+                return false;
+            completedPlayers[i] = true;
         }
         return true;
     }
